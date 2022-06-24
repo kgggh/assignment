@@ -9,5 +9,4 @@ class TripleApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
