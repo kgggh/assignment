@@ -6,6 +6,7 @@ import com.triple.assignment.model.entity.User;
 import com.triple.assignment.model.enums.EventActionType;
 import com.triple.assignment.model.enums.EventType;
 import com.triple.assignment.repository.UserRepository;
+import com.triple.assignment.service.impl.PointException;
 import com.triple.assignment.service.impl.PointServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ class PointServiceTest {
         /* when */
 
         /* then */
-        assertThrows(PointException.class, () -> pointService.get(user.getId()));
+        assertThrows(PointException.class, () -> pointService.getUserPoints(user.getId()));
     }
 
     @Test
@@ -55,7 +56,7 @@ class PointServiceTest {
         pointService.create(pointCreateRequestDto);
 
         /* when */
-        List<PointResponseDto> userPoints = pointService.get(user.getId());
+        List<PointResponseDto> userPoints = pointService.getUserPoints(user.getId());
 
         /* then */
         System.out.println(userPoints);

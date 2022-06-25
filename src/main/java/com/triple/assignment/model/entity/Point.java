@@ -52,4 +52,9 @@ public class Point extends BaseTimeEntity {
         return new Point(user, point, actionType, type, content, appliedPoint);
     }
 
+    public void updatePointHistory(int point, int appliedPoint, String content) {
+        this.point = point;
+        this.appliedPoint = appliedPoint;
+        this.content = content;
+    }
 }

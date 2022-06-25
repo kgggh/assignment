@@ -18,12 +18,12 @@ public class MockEventRequestDto extends EventRequest {
     }
 
     @Override
-    public EventActionType getActionType() {
-        return this.actionType;
+    public EventActionType getAction() {
+        return this.action;
     }
 
     @Override
-    public void setActionType(EventActionType actionType) {
-        this.actionType = actionType;
+    public void setAction(EventActionType action) {
+        this.action = action;
     }
 }

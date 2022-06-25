@@ -7,7 +7,6 @@ import com.triple.assignment.model.entity.Point;
 import com.triple.assignment.model.entity.User;
 import com.triple.assignment.repository.PointRepository;
 import com.triple.assignment.repository.UserRepository;
-import com.triple.assignment.service.PointException;
 import com.triple.assignment.service.PointService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +27,10 @@ public class PointServiceImpl implements PointService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PointResponseDto> get(UUID userId) {
-        log.debug("userId={}",userId);
-
+    public List<PointResponseDto> getUserPoints(UUID userId) {
         User user = getUser(userId);
         List<Point> userPoint = pointRepository.findByUser(user);
+
         return Optional.ofNullable(userPoint.stream()
                 .map(point -> PointResponseDto.builder()
                         .point(point.getPoint())
@@ -42,10 +40,31 @@ public class PointServiceImpl implements PointService {
                         .type(point.getType())
                         .content(point.getContent())
                         .build())
-                .collect(Collectors.toList())).filter(u -> !u.isEmpty()).orElseThrow(() -> new PointException(ErrorCode.NOT_EXIST_POINT));
+                .collect(Collectors.toList()))
+                .filter(u -> !u.isEmpty())
+                .orElseThrow(() -> new PointException(ErrorCode.NOT_EXIST_POINT));
     }
 
-    private User getUser(UUID userId) {
+    @Override
+    @Transactional(readOnly = true)
+    public PointResponseDto getPoint(UUID pointId) throws PointException {
+        log.debug("pointId={}", pointId);
+
+        Point point = pointRepository.findById(pointId)
+                .orElseThrow(() -> new PointException(ErrorCode.NOT_EXIST_USER.getReason()));
+
+        return new PointResponseDto(
+                point.getUser().getId(),
+                point.getType(),
+                point.getActionType(),
+                point.getContent(),
+                point.getPoint(),
+                point.getAppliedPoint());
+    }
+
+    private User getUser(UUID userId) throws PointException {
+        log.debug("userId={}", userId);
+
         return userRepository.findById(userId)
                 .orElseThrow(() -> new PointException(ErrorCode.NOT_EXIST_USER.getReason()));
     }
@@ -54,16 +73,19 @@ public class PointServiceImpl implements PointService {
     @Transactional(readOnly = true)
     public int getTotalPoint(UUID userId) {
         User user = getUser(userId);
-        Point point = pointRepository.findTopByUserOrderByCreatedDatetimeDesc(user)
+        Point point = pointRepository.findTop1ByUserOrderByCreatedDatetimeDesc(user)
                 .orElseThrow(() -> new PointException(ErrorCode.NOT_EXIST_POINT));
+
         return point.getPoint();
     }
 
     @Override
     @Transactional
     public UUID create(PointCreateRequestDto pointCreateRequestDto) {
-        log.debug("pointCreateRequestDto={}",pointCreateRequestDto);
+        log.debug("pointCreateRequestDto={}", pointCreateRequestDto);
+
         User user = getUser(pointCreateRequestDto.getUserId());
+
         return pointRepository.save(Point.createPoint(
                 user,pointCreateRequestDto.getPoint(),
                 pointCreateRequestDto.getActionType(),
